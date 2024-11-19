@@ -1,0 +1,3 @@
+[submodule "TrafficSignal"]
+	path = TrafficSignal
+	url = https://github.com/N-E-W-T-O-N/TrafficSignal.git
