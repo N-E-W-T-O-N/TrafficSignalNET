@@ -1,0 +1,28 @@
+{
+  "name": "Dev Container with .NET and Python",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "ms-dotnettools.csharp", // For .NET
+        "ms-dotnettools.dotnet-interactive-vscode", // For .NET Interactive
+        "ms-dotnettools.csdevkit", // .Net DEV Kit
+
+        "ms-python.python", // For Python
+        "esbenp.prettier-vscode", // Optional: Code formatting
+        "ms-toolsai.jupyter" // Optional: For Jupyter support in Python
+      ]
+    }
+  },
+  "forwardPorts": [
+    5000,
+    5001
+  ], // Common ports for .NET and Python apps
+  "postCreateCommand": "dotnet --info && python --version && dotnet tool install --global interactive ",
+  "remoteUser": "vscode"
+}
