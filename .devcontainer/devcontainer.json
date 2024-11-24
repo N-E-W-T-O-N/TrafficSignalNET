@@ -6,14 +6,26 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/opt/conda/bin/python",
+        "python.linting.enabled": true,
+        "python.linting.pylintEnabled": true,
+        "python.formatting.autopep8Path": "/usr/local/py-utils/bin/autopep8",
+        "python.formatting.blackPath": "/usr/local/py-utils/bin/black",
+        "python.formatting.yapfPath": "/usr/local/py-utils/bin/yapf",
+        "python.linting.banditPath": "/usr/local/py-utils/bin/bandit",
+        "python.linting.flake8Path": "/usr/local/py-utils/bin/flake8",
+        "python.linting.mypyPath": "/usr/local/py-utils/bin/mypy",
+        "python.linting.pycodestylePath": "/usr/local/py-utils/bin/pycodestyle",
+        "python.linting.pydocstylePath": "/usr/local/py-utils/bin/pydocstyle",
+        "python.linting.pylintPath": "/usr/local/py-utils/bin/pylint"
       },
       "extensions": [
         "ms-dotnettools.csharp", // For .NET
         "ms-dotnettools.dotnet-interactive-vscode", // For .NET Interactive
         "ms-dotnettools.csdevkit", // .Net DEV Kit
-
         "ms-python.python", // For Python
+        "ms-python.vscode-pylance",
         "esbenp.prettier-vscode", // Optional: Code formatting
         "ms-toolsai.jupyter" // Optional: For Jupyter support in Python
       ]
@@ -23,6 +35,10 @@
     5000,
     5001
   ], // Common ports for .NET and Python apps
-  "postCreateCommand": "dotnet --info && python --version && dotnet tool install --global interactive ",
-  "remoteUser": "vscode"
+  "postCreateCommand": "dotnet --info && python --version",
+  "remoteUser": "vscode",
+  "features": {
+    "mcr.microsoft.com/devcontainers/miniconda:3": {},
+    "mcr.microsoft.com/devcontainers/dotnet:8.0": {}
+  }
 }
