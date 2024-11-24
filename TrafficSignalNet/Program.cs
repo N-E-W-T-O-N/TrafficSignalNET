@@ -12,7 +12,7 @@ using Tensorflow.NumPy;
 //using Tensorflow.Operations.Losses;
 using TrafficSignalNET;
 //using System.Reflection;
-//using Newtonsoft.Json;
+using Newtonsoft.Json;
 using static Tensorflow.Binding;
 //using static Tensorflow.KerasApi;
 //using static Tensorflow.Keras.Utils.KerasUtils;
@@ -72,8 +72,8 @@ int totalCount = yLabels.Count();
 
 Dictionary<int,float> classWeight = yLabels.GroupBy(x => x)
     .Select(g => new { Index = g.Key, Count = g.Count() })
-    .OrderBy(x=>x.Index)
-    .ToDictionary(x => x.Index, x =>  totalCount/ (float)(classCount*x.Count));
+    .OrderBy(x => x.Index)
+    .ToDictionary(x => x.Index, x =>  totalCount / (float)(classCount*x.Count));
 //.ToDictionary(x => x.Index, x => x.Count/ (float)totalCount );
 
 Console.WriteLine("ClassWeight");
@@ -134,18 +134,17 @@ ts.Save("./Model");
 
 
 //var hist = JsonConvert.SerializeObject(history.history);
-//File.WriteAllText("History.json",hist);
-
-r.CreateImage(history.history,path:Path.Join(BasePath,"..","ModelResult.jpg"));
+//File.WriteAllText("History.json", hist);
+r.CreateImage(history.history, path: Path.Join(BasePath,"..","ModelResult.jpg"));
 
 
 /* NOW TEST THE MODEL*/
 
 //FilePath = Path.Combine(BasePath, "Test");
 
-records = r.ReadCsv(path: Path.Combine(BasePath ,"Test.csv"));
+records = r.ReadCsv(path: Path.Combine(BasePath,"Test.csv"));
 
-List<string> testImagePath =new();
+List<string> testImagePath = new();
 List<int> textXLabels = new();
 
 foreach (var row in records)
@@ -165,7 +164,7 @@ var xTest = np.zeros((testImagePath.Count, img_h,img_w, n_channels), dtype: tf.f
 
 r.LoadImage(testImagePath.ToArray(), xTest, "Testing");
 
-var yTest=ts.Predict(xTest,1);
+var yTest = ts.Predict(xTest, 1);
 
 Console.WriteLine();
 Console.WriteLine();
@@ -189,7 +188,7 @@ for (int ind = 0; ind < classCount; ind++)
 }
 Console.WriteLine();
 
-for (i = 0 ;i< textXLabels.Count; i++)
+for (i = 0; i < textXLabels.Count; i++)
 {
     try
     {
@@ -207,17 +206,28 @@ Console.WriteLine();
 //var m = JsonConvert.SerializeObject(matrix);
 //File.WriteAllText("Metrix.json", m);
 
+Console.WriteLine();
+Console.WriteLine("CONFUSION MATRIX");
+Console.WriteLine();
+Console.WriteLine("".PadRight(80, ' ') + "PREDICTION");
+var predict = Enumerable.Range(1, 43).Select(x => $"[{x.ToString().PadLeft(3, '0')}]").ToArray();
+Console.WriteLine("    |" + string.Join(",", predict));
+
+Console.WriteLine("".PadRight(171, '-'));
+
+var labelValue = Enumerable.Range(1, 43).ToArray();
+i = 0;
 
 foreach (var row in matrix)
 {
-    foreach (var col in row)
-    {
-        Console.Write($"{col} ");
-    }
-    Console.WriteLine();
+    // Convert each 'r' to a string of formatted elements
+    var formatted = row.Select(x => $"[{x.ToString().PadLeft(3, '0')}]").ToArray();
+
+    Console.Write("|" + $"{labelValue[i]}".PadLeft(3, '0') + "|");
+    i++;
+    // Join all formatted elements with a comma and print the result
+    Console.WriteLine(string.Join(",", formatted));
 }
-Console.WriteLine();
-Console.WriteLine();
 
 class FileOperation
 {
@@ -274,7 +284,6 @@ class FileOperation
 
     public List<DataRow> ReadCsv(string path)
     {
-       
         using var reader = new StreamReader(path);
         using var csv = new CsvReader(reader, CultureInfo.InvariantCulture);
         //csv.Context.RegisterClassMap<DataRowMap>();
@@ -350,7 +359,7 @@ public class TrafficSignal
 /// <param name="yTrain"></param>
 /// <param name="classWeight"></param>
 /// <returns></returns>
-    public ICallback Train(NDArray xTrain, NDArray yTrain,Dictionary<int,float> classWeight=null)
+    public ICallback Train(NDArray xTrain, NDArray yTrain, Dictionary<int, float> classWeight = null)
     {
         // training
         //model.fit(xTrain[new Slice(0, 2000)], yTrain[new Slice(0, 2000)],
@@ -387,19 +396,19 @@ public class TrafficSignal
     }
 
 /// <summary>
-/// Save Model Weight
+/// Save trained Model Weight
 /// </summary>
-/// <param name="filePath"></param>
-
     public void Save(string filePath) //"./toy_resnet_model"
     {
+        if (model is null)
+            throw new NullReferenceException("First call `BuildModel` Method to INITIALIZED the model object");
+
         // save the model
-        model!.save(filePath);
-        
+        model!.save(filePath, save_format: "tf");
     }
 
 /// <summary>
-/// Predict Model based on Input
+/// Run prediction based on Trained model
 /// </summary>
 /// <param name="value"></param>
 /// <param name="verbose"></param>
@@ -409,6 +418,22 @@ public class TrafficSignal
         // var c = confusion_matrix;
         var result = model.predict(value, verbose: verbose);
         return tf.arg_max(result, 1);
+    }
+
+    /// <summary>
+    /// Load tf model 
+    /// </summary>
+    /// <param name="modelPath"></param>
+    /// <exception cref="NullReferenceException"></exception>
+    public void LoadMode(string modelPath)
+    {
+        if (String.IsNullOrEmpty(modelPath))
+            throw new NullReferenceException("Please Provide the Path");
+
+        model = tf.keras.models.load_model(modelPath);
+        Console.WriteLine("Loding Model...");
+        model.summary();
+        Compile();
     }
 }
 
